@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from bson import ObjectId
 
+#IF THE BACKEND IS NOT WORKING, UPDATE YOUR MONGODB DRIVER USING pip install --upgrade pymongo IN THE CMD TERMINAL
+
 load_dotenv()
 
 app = FastAPI()
@@ -42,9 +44,9 @@ except Exception as e:
 try:
     students.drop_indexes()  
     students.create_index([("date", 1), ("name", 1)], unique=True)
-    print("✅ Created database indexes without student_id field")
+    print("Created database indexes without student_id field")
 except Exception as e:
-    print(f"⚠️ Index creation failed: {e}")
+    print(f"Index creation failed: {e}")
 
 class StudentCreate(BaseModel):
     name: str
