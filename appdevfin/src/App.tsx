@@ -153,6 +153,10 @@ function App() {
         />
       </div>
 
+      <div>
+        <UserButton/>
+      </div>
+
       <button onClick={clearDatabase}>Clear Database</button>
 
       {selectedDate && (
