@@ -101,7 +101,6 @@ function App() {
     }
   };
 
-  // Add this useEffect to load messages when admin signs in
   useEffect(() => {
     if (user) {
       fetchStudentMessages();
@@ -448,14 +447,14 @@ function App() {
       <textarea
         value={messageContent}
         onChange={(e) => setMessageContent(e.target.value)}
-        placeholder="Your message to admins..."
+        placeholder="Your message to admins:"
         rows={4}
       />
       <input
         type="text"
         value={senderName}
         onChange={(e) => setSenderName(e.target.value)}
-        placeholder="Your name (optional)"
+        placeholder="Your name:"
       />
       <button onClick={sendMessage}>Send Message</button>
       {messageStatus && <p className="message-status">{messageStatus}</p>}
