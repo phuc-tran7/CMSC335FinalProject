@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -14,6 +14,12 @@ interface Student {
   timestamp: string;
 }
 
+interface Announcement {
+  content: string;
+  author: string;
+  timestamp: string;
+}
+
 function App() {
   const [date, setDate] = useState<Value>(new Date());
   const [students, setStudents] = useState<Student[]>([]);
@@ -21,6 +27,9 @@ function App() {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [newAnnouncement, setNewAnnouncement] = useState('');
+  const { user } = useUser();
 
   const fetchStudents = async (dateStr: string) => {
     setLoading(true);
@@ -36,6 +45,17 @@ function App() {
       setStudents([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAnnouncements = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/announcements');
+      if (!response.ok) throw new Error('Failed to fetch announcements');
+      const data = await response.json();
+      setAnnouncements(data);
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
     }
   };
 
@@ -82,13 +102,46 @@ function App() {
     }
   };
 
+  const postAnnouncement = async () => {
+    if (!newAnnouncement.trim()) {
+      setError('Please enter announcement content');
+      return;
+    }
+    if (!user) {
+      setError('You must be signed in to post announcements');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newAnnouncement,
+          author: user.fullName || 'Anonymous'
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to post announcement');
+      
+      const newAnnounce = await response.json();
+      setAnnouncements(prev => [newAnnounce, ...prev]);
+      setNewAnnouncement('');
+      setError('');
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Failed to post announcement');
+    }
+  };
+
   const updateAttendance = async (studentName: string, studentDate: string, isPresent: boolean) => {
     if (!studentName || !studentDate) {
       setError('Invalid student information');
       return;
     }
   
-    console.log('Updating attendance for student:', studentName, studentDate); 
     try {
       const response = await fetch(`http://localhost:8000/students/${studentName}/${studentDate}`, {
         method: 'PUT',
@@ -138,87 +191,128 @@ function App() {
       setSelectedDate(todayStr);
       fetchStudents(todayStr);
     }
+    fetchAnnouncements();
   }, []);
 
   return (
-  <>
-    <SignedIn>
-    <div className="app">
-      <h1>Student Attendance System</h1>
-      
-      <div className="calendar-container">
-        <Calendar 
-          onChange={handleDateChange} 
-          value={date}
-        />
-      </div>
-
-      <div className="button-container">
-          <button onClick={clearDatabase}>Clear Database</button>
-          <div className="user-button-wrapper">
-            <UserButton afterSignOutUrl="/" />
-          </div>
-      </div>
-
-      {selectedDate && (
-        <div className="attendance-section">
-          <h2>Attendance for {selectedDate}</h2>
+    <>
+      <SignedIn>
+        <div className="app">
+          <h1>Student Attendance System</h1>
           
-          <div className="add-student">
-            <input
-              type="text"
-              value={newStudentName}
-              onChange={(e) => {
-                setNewStudentName(e.target.value);
-                setError('');
-              }}
-              placeholder="Student name"
-              onKeyDown={(e) => e.key === 'Enter' && addStudent()}
+          <div className="calendar-container">
+            <Calendar 
+              onChange={handleDateChange} 
+              value={date}
             />
-            <button onClick={addStudent}>Add Student</button>
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          <div className="button-container">
+              <button onClick={clearDatabase}>Clear Database</button>
+              <div className="user-button-wrapper">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+          </div>
 
-          {loading ? (
-            <p>Loading attendance data</p>
-          ) : students.length > 0 ? (
-            <table className="attendance-table">
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Attendance</th>
-                </tr>
-              </thead>
-              <tbody>
-              {students.map(student => (
-  <tr key={student.name + student.date}>
-    <td>{student.name}</td>
-    <td>
-      <input
-        type="checkbox"
-        checked={student.is_present}
-        onChange={(e) => updateAttendance(student.name, student.date, e.target.checked)} 
-      />
-    </td>
-  </tr>
-))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No students added for this date yet.</p>
+          {selectedDate && (
+            <div className="attendance-section">
+              <h2>Attendance for {selectedDate}</h2>
+              
+              <div className="add-student">
+                <input
+                  type="text"
+                  value={newStudentName}
+                  onChange={(e) => {
+                    setNewStudentName(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="Student name"
+                  onKeyDown={(e) => e.key === 'Enter' && addStudent()}
+                />
+                <button onClick={addStudent}>Add Student</button>
+              </div>
+
+              {error && <p className="error-message">{error}</p>}
+
+              {loading ? (
+                <p>Loading attendance data</p>
+              ) : students.length > 0 ? (
+                <table className="attendance-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Attendance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map(student => (
+                      <tr key={student.name + student.date}>
+                        <td>{student.name}</td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={student.is_present}
+                            onChange={(e) => updateAttendance(student.name, student.date, e.target.checked)} 
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No students added for this date yet.</p>
+              )}
+            </div>
           )}
-        </div>
-      )}
-    </div>
-    </SignedIn>
 
-    <SignedOut>
+          <div className="announcements-section">
+            <h2>Announcements</h2>
+            <div className="post-announcement">
+              <textarea
+                value={newAnnouncement}
+                onChange={(e) => {
+                  setNewAnnouncement(e.target.value);
+                  setError('');
+                }}
+                placeholder="Write an announcement..."
+                rows={3}
+              />
+              <button onClick={postAnnouncement}>Post Announcement</button>
+            </div>
+            <div className="announcements-list">
+              {announcements.map((announcement, index) => (
+                <div key={index} className="announcement">
+                  <p className="announcement-content">{announcement.content}</p>
+                  <p className="announcement-meta">
+                    Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SignedIn>
+
+      <SignedOut>
         <div className="auth-message">
           <h2>Please sign in to access the attendance system</h2>
           <SignInButton />
+          
+          <div className="announcements-section">
+            <h2>Announcements</h2>
+            <div className="announcements-list">
+              {announcements.map((announcement, index) => (
+                <div key={index} className="announcement">
+                  <p className="announcement-content">{announcement.content}</p>
+                  <p className="announcement-meta">
+                    Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-    </SignedOut>
+      </SignedOut>
     </>
   );
 }

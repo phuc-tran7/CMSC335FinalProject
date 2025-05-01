@@ -10,9 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from bson import ObjectId
 
-#IF THE BACKEND IS NOT WORKING, UPDATE YOUR MONGODB DRIVER USING pip install --upgrade pymongo IN THE CMD TERMINAL
-#
-
 load_dotenv()
 
 app = FastAPI()
@@ -37,6 +34,7 @@ try:
     client.admin.command('ping')
     db = client["attendance_db"]
     students = db["students"]
+    announcements = db["announcements"]
     print("Successfully connected to MongoDB!")
 except Exception as e:
     print(f"Database connection failed: {e}")
@@ -62,6 +60,13 @@ class StudentResponse(StudentCreate):
 
 class AttendanceUpdate(BaseModel):
     is_present: bool
+
+class AnnouncementCreate(BaseModel):
+    content: str
+    author: str
+
+class AnnouncementResponse(AnnouncementCreate):
+    timestamp: datetime
 
 @app.post("/students", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 def create_student(student: StudentCreate):
@@ -100,7 +105,7 @@ def update_attendance(name: str, date: str, update: AttendanceUpdate = Body(...)
     """Update student attendance based on name and date"""
     try:
         result = students.update_one(
-            {"name": name, "date": date},  # Find by name and date
+            {"name": name, "date": date},
             {"$set": {"is_present": update.is_present}}
         )
         if result.matched_count == 0:
@@ -136,6 +141,46 @@ def get_students(date: str):
                 timestamp=student["timestamp"]
             )
             for student in student_list
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@app.post("/announcements", response_model=AnnouncementResponse, status_code=status.HTTP_201_CREATED)
+def create_announcement(announcement: AnnouncementCreate):
+    """Create a new announcement"""
+    try:
+        announcement_dict = announcement.dict()
+        announcement_dict["timestamp"] = datetime.now()
+
+        result = announcements.insert_one(announcement_dict)
+        created_announcement = announcements.find_one({"_id": result.inserted_id})
+
+        return AnnouncementResponse(
+            content=created_announcement["content"],
+            author=created_announcement["author"],
+            timestamp=created_announcement["timestamp"]
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@app.get("/announcements", response_model=List[AnnouncementResponse])
+def get_announcements():
+    """Get all announcements"""
+    try:
+        announcements_list = list(announcements.find().sort("timestamp", -1))
+        return [
+            AnnouncementResponse(
+                content=announcement["content"],
+                author=announcement["author"],
+                timestamp=announcement["timestamp"]
+            )
+            for announcement in announcements_list
         ]
     except Exception as e:
         raise HTTPException(
