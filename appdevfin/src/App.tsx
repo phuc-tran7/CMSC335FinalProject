@@ -20,6 +20,14 @@ interface Announcement {
   timestamp: string;
 }
 
+interface StudentMessage {
+  id: string;
+  content: string;
+  sender: string;
+  contact_info: string;
+  timestamp: string;
+}
+
 function App() {
   const [date, setDate] = useState<Value>(new Date());
   const [students, setStudents] = useState<Student[]>([]);
@@ -31,6 +39,74 @@ function App() {
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isClearingAnnouncements, setIsClearingAnnouncements] = useState(false);
   const { user } = useUser();
+  const [studentMessages, setStudentMessages] = useState<StudentMessage[]>([]);
+  const [messageContent, setMessageContent] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
+  const [loadingMessages, setLoadingMessages] = useState(false);
+
+  const fetchStudentMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const response = await fetch("http://localhost:8000/student-messages");
+      const data = await response.json();
+      setStudentMessages(data);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!messageContent.trim()) {
+      setMessageStatus("Please enter a message");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/student-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: messageContent,
+          sender: senderName || "Anonymous",
+          contact_info: contactInfo,
+        }),
+      });
+
+      if (response.ok) {
+        setMessageStatus("Message sent successfully!");
+        setMessageContent("");
+        setSenderName("");
+        setContactInfo("");
+        setTimeout(() => setMessageStatus(""), 3000);
+      }
+    } catch (error) {
+      setMessageStatus("Failed to send message");
+    }
+  };
+
+  const deleteMessage = async (id: string) => {
+    if (window.confirm("Delete this message?")) {
+      try {
+        await fetch(`http://localhost:8000/student-messages/${id}`, {
+          method: "DELETE",
+        });
+        setStudentMessages(studentMessages.filter((msg) => msg.id !== id));
+      } catch (error) {
+        console.error("Error deleting message:", error);
+      }
+    }
+  };
+
+  // Add this useEffect to load messages when admin signs in
+  useEffect(() => {
+    if (user) {
+      fetchStudentMessages();
+    }
+  }, [user]);
 
   const fetchStudents = async (dateStr: string) => {
     setLoading(true);
@@ -327,6 +403,38 @@ function App() {
               )}
             </div>
           </div>
+
+          <div className="admin-messages">
+    <h2>Student Messages</h2>
+    {loadingMessages ? (
+      <p>Loading messages...</p>
+    ) : studentMessages.length > 0 ? (
+      <div className="message-list">
+        {studentMessages.map((message) => (
+          <div key={message.id} className="message-card">
+            <div className="message-content">
+              <p>{message.content}</p>
+              <div className="message-meta">
+                <span>From: {message.sender}</span>
+                {message.contact_info && (
+                  <span>Contact: {message.contact_info}</span>
+                )}
+                <span>{new Date(message.timestamp).toLocaleString()}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => deleteMessage(message.id)}
+              className="delete-message-btn"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No messages from students</p>
+    )}
+  </div>
         </div>
       </SignedIn>
 
@@ -334,6 +442,24 @@ function App() {
         <div className="auth-message">
           <h2>Please sign in to access the attendance system</h2>
           <SignInButton />
+
+          <div className="student-message-form">
+      <h3>Contact Administrators</h3>
+      <textarea
+        value={messageContent}
+        onChange={(e) => setMessageContent(e.target.value)}
+        placeholder="Your message to admins..."
+        rows={4}
+      />
+      <input
+        type="text"
+        value={senderName}
+        onChange={(e) => setSenderName(e.target.value)}
+        placeholder="Your name (optional)"
+      />
+      <button onClick={sendMessage}>Send Message</button>
+      {messageStatus && <p className="message-status">{messageStatus}</p>}
+    </div>
           
           <div className="announcements-section">
             <h2>Announcements</h2>

@@ -47,6 +47,15 @@ try:
 except Exception as e:
     print(f"Index creation failed: {e}")
 
+class StudentMessageCreate(BaseModel):
+    content: str
+    sender: str = "Anonymous"
+    contact_info: str = ""
+
+class StudentMessageResponse(StudentMessageCreate):
+    id: str
+    timestamp: datetime
+
 class StudentCreate(BaseModel):
     name: str
     date: str
@@ -239,3 +248,23 @@ def clear_announcements():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to clear announcements"
         )
+
+@app.post("/student-messages", response_model=StudentMessageResponse)
+async def create_message(message: StudentMessageCreate):
+    message_data = message.dict()
+    message_data["timestamp"] = datetime.now()
+    result = db.student_messages.insert_one(message_data)
+    return {**message_data, "id": str(result.inserted_id)}
+
+@app.get("/student-messages", response_model=List[StudentMessageResponse])
+async def get_messages():
+    messages = []
+    for msg in db.student_messages.find().sort("timestamp", -1):
+        msg["id"] = str(msg["_id"])
+        messages.append(msg)
+    return messages
+
+@app.delete("/student-messages/{message_id}")
+async def delete_message(message_id: str):
+    db.student_messages.delete_one({"_id": ObjectId(message_id)})
+    return {"status": "deleted"}
