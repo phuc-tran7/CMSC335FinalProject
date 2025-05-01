@@ -153,11 +153,12 @@ function App() {
         />
       </div>
 
-      <div>
-        <UserButton/>
+      <div className="button-container">
+          <button onClick={clearDatabase}>Clear Database</button>
+          <div className="user-button-wrapper">
+            <UserButton afterSignOutUrl="/" />
+          </div>
       </div>
-
-      <button onClick={clearDatabase}>Clear Database</button>
 
       {selectedDate && (
         <div className="attendance-section">

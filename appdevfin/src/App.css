@@ -71,3 +71,19 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
+
+.button-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.user-button-wrapper {
+  margin-left: auto; 
+}
+.cl-userButton-root {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem;
+}
