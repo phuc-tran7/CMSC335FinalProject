@@ -221,3 +221,21 @@ def clear_students():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to clear database"
         )
+
+@app.delete("/announcements")
+def clear_announcements():
+    """Clear all announcements from the database"""
+    try:
+        result = db["announcements"].delete_many({})
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No announcements found to delete"
+            )
+        return {"message": "All announcements have been cleared"}
+    except Exception as e:
+        print(f"Error clearing announcements: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to clear announcements"
+        )

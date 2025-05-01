@@ -29,6 +29,7 @@ function App() {
   const [error, setError] = useState('');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState('');
+  const [isClearingAnnouncements, setIsClearingAnnouncements] = useState(false);
   const { user } = useUser();
 
   const fetchStudents = async (dateStr: string) => {
@@ -133,6 +134,29 @@ function App() {
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to post announcement');
+    }
+  };
+
+  const clearAnnouncements = async () => {
+    if (!window.confirm('Are you sure you want to clear all announcements? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsClearingAnnouncements(true);
+    try {
+      const response = await fetch('http://localhost:8000/announcements', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to clear announcements');
+      
+      setAnnouncements([]);
+      setError('');
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Failed to clear announcements');
+    } finally {
+      setIsClearingAnnouncements(false);
     }
   };
 
@@ -266,7 +290,16 @@ function App() {
           )}
 
           <div className="announcements-section">
-            <h2>Announcements</h2>
+            <div className="announcements-header">
+              <h2>Announcements</h2>
+              <button 
+                onClick={clearAnnouncements} 
+                className="clear-announcements-btn"
+                disabled={isClearingAnnouncements || announcements.length === 0}
+              >
+                {isClearingAnnouncements ? 'Clearing...' : 'Clear Announcements'}
+              </button>
+            </div>
             <div className="post-announcement">
               <textarea
                 value={newAnnouncement}
@@ -280,14 +313,18 @@ function App() {
               <button onClick={postAnnouncement}>Post Announcement</button>
             </div>
             <div className="announcements-list">
-              {announcements.map((announcement, index) => (
-                <div key={index} className="announcement">
-                  <p className="announcement-content">{announcement.content}</p>
-                  <p className="announcement-meta">
-                    Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+              {announcements.length === 0 ? (
+                <p className="no-announcements">No announcements yet.</p>
+              ) : (
+                announcements.map((announcement, index) => (
+                  <div key={index} className="announcement">
+                    <p className="announcement-content">{announcement.content}</p>
+                    <p className="announcement-meta">
+                      Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -301,14 +338,18 @@ function App() {
           <div className="announcements-section">
             <h2>Announcements</h2>
             <div className="announcements-list">
-              {announcements.map((announcement, index) => (
-                <div key={index} className="announcement">
-                  <p className="announcement-content">{announcement.content}</p>
-                  <p className="announcement-meta">
-                    Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+              {announcements.length === 0 ? (
+                <p className="no-announcements">No announcements yet.</p>
+              ) : (
+                announcements.map((announcement, index) => (
+                  <div key={index} className="announcement">
+                    <p className="announcement-content">{announcement.content}</p>
+                    <p className="announcement-meta">
+                      Posted by {announcement.author} on {new Date(announcement.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
