@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -140,6 +141,8 @@ function App() {
   }, []);
 
   return (
+  <>
+    <SignedIn>
     <div className="app">
       <h1>Student Attendance System</h1>
       
@@ -203,6 +206,15 @@ function App() {
         </div>
       )}
     </div>
+    </SignedIn>
+
+    <SignedOut>
+        <div className="auth-message">
+          <h2>Please sign in to access the attendance system</h2>
+          <SignInButton />
+        </div>
+    </SignedOut>
+    </>
   );
 }
 
