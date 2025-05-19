@@ -1,0 +1,206 @@
+.outsideBox{
+     display: flex;
+    justify-content: center; 
+    align-items: center;   
+
+
+
+}
+
+.body{
+    display: flex;
+    justify-content: center; 
+    align-items: center;   
+
+}
+
+.smallGuys{
+    display: flex;
+    flex-direction: row;  /* This is default, but good to be explicit */
+    justify-content: center; 
+    align-items: center;
+    gap: 2rem;
+
+    
+    
+    }
+
+.admin-messages{
+    padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f2f2f2;
+  width: 35em;
+  height: 18em;
+
+
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+}
+
+.cl-avatarImage{
+    width: 10em;
+}
+
+
+.auth-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .auth-message h2 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+  }
+  
+  .cl-signIn-button {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    font-size: 1rem !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .cl-signIn-button:hover {
+    background-color: #3e8e41 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .frontPageBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    padding: 2rem;
+    min-height: 80vh;
+
+  }
+  
+  .student-message-form {
+    padding: 2rem;
+    padding-right:2em;
+    margin-right:1em;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: rgb(121, 160, 216);
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .student-message-form h3 {
+    font-family: 'Inter', sans-serif;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  
+  .student-message-form textarea,
+  .student-message-form input {
+    width: 80%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+  }
+  
+  .student-message-form textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .student-message-form button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    width: 100%;
+  }
+  
+  .student-message-form button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .message-status {
+    margin-top: 1rem;
+    color: #27ae60;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .announcements-section {
+    transform: translateX(-5px);
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+
+    background-color: rgb(121, 160, 216)!important;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .announcements-section h2 {
+    font-family: 'Inter', sans-serif;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .no-announcements {
+    font-family: 'Inter', sans-serif;
+    color: #7f8c8d;
+    text-align: center;
+  }
+  
+  .announcement {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #d3d3d3;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+  }
+  
+  .announcement-content {
+    font-family: 'Inter', sans-serif;
+    color: #2c3e50;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+  
+  .announcement-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
