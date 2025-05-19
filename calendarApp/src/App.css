@@ -5,7 +5,7 @@
   margin: 2rem auto;
   max-width: 800px;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: lightslategray;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -30,7 +30,7 @@
 }
 
 .announcement {
-  background-color: white;
+  background-color: lightgray;
   padding: 1rem;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -55,6 +55,56 @@
 .calendar-container {
   margin: 0 auto;
   max-width: 400px;
+}
+
+
+.react-calendar{
+  border: none !important;
+  background-color: transparent;
+}
+
+.react-calendar .react-calendar__navigation{
+  background-color: #242424;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.react-calendar  .react-calendar__navigation__prev2-button {
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar  .react-calendar__navigation__prev-button {
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar  .react-calendar__navigation__label {
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar  .react-calendar__navigation__next-button {
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar  .react-calendar__navigation__next2-button {
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar .react-calendar__month-view__weekdays{
+  color: black;
+  background-color: burlywood;
+}
+
+.react-calendar .react-calendar__month-view__days{
+  background-color: rgb(222, 120, 120);
+}
+
+.react-calendar .react-calendar__tile--now {
+  background-color: lightblue;
 }
 
 .button-container {
@@ -92,7 +142,7 @@
 }
 
 .attendance-table th {
-  background-color: #f2f2f2;
+  background-color: lightslategray;
 }
 
 .error-message {

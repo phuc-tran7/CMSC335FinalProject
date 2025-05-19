@@ -5,7 +5,6 @@ import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Configure __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -14,7 +13,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Enhanced CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [process.env.FRONTEND_URL] 
@@ -23,12 +21,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
 }
 
-// MongoDB Connection
 const uri = `mongodb+srv://${encodeURIComponent(process.env.DB_USERNAME)}:${encodeURIComponent(process.env.DB_PASSWORD)}@cluster0.j3b3xbq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const client = new MongoClient(uri, { 
   serverApi: {
@@ -63,9 +59,6 @@ async function connectToDatabase() {
 
 connectToDatabase();
 
-// API Routes
-
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'Attendance System API',
@@ -74,7 +67,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health Check
 app.get('/health', async (req, res) => {
   try {
     await client.db().admin().ping();
@@ -93,7 +85,6 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Create Student
 app.post('/students', async (req, res) => {
   const { name, date, is_present = false } = req.body;
   
@@ -137,7 +128,6 @@ app.post('/students', async (req, res) => {
   }
 });
 
-// Update Attendance
 app.put('/students/:name/:date', async (req, res) => {
   const { name, date } = req.params;
   const { is_present } = req.body;
@@ -170,7 +160,6 @@ app.put('/students/:name/:date', async (req, res) => {
   }
 });
 
-// Get Students by Date
 app.get('/students/:date', async (req, res) => {
   try {
     const data = await students.find({ date: req.params.date }).toArray();
@@ -187,7 +176,6 @@ app.get('/students/:date', async (req, res) => {
   }
 });
 
-// Create Announcement
 app.post('/announcements', async (req, res) => {
   const { content, author } = req.body;
   
@@ -217,7 +205,6 @@ app.post('/announcements', async (req, res) => {
   }
 });
 
-// Get Announcements
 app.get('/announcements', async (req, res) => {
   try {
     const data = await announcements.find().sort({ timestamp: -1 }).toArray();
@@ -234,7 +221,6 @@ app.get('/announcements', async (req, res) => {
   }
 });
 
-// Create Student Message
 app.post('/student-messages', async (req, res) => {
   const { content, sender = 'Anonymous', contact_info = '' } = req.body;
   
@@ -264,7 +250,6 @@ app.post('/student-messages', async (req, res) => {
   }
 });
 
-// Get Student Messages
 app.get('/student-messages', async (req, res) => {
   try {
     const data = await messages.find().sort({ timestamp: -1 }).toArray();
@@ -281,7 +266,6 @@ app.get('/student-messages', async (req, res) => {
   }
 });
 
-// Delete Message
 app.delete('/student-messages/:messageId', async (req, res) => {
   try {
     const result = await messages.deleteOne({ _id: new ObjectId(req.params.messageId) });
@@ -306,7 +290,6 @@ app.delete('/student-messages/:messageId', async (req, res) => {
   }
 });
 
-// Clear Students
 app.delete('/students', async (req, res) => {
   try {
     const result = await students.deleteMany({});
@@ -323,7 +306,6 @@ app.delete('/students', async (req, res) => {
   }
 });
 
-// Clear Announcements
 app.delete('/announcements', async (req, res) => {
   try {
     const result = await announcements.deleteMany({});
@@ -340,14 +322,12 @@ app.delete('/announcements', async (req, res) => {
   }
 });
 
-// Handle client-side routing in production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
   });
 }
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
